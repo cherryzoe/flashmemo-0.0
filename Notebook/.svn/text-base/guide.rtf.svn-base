@@ -1,0 +1,172 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red63\green110\blue116;\red170\green13\blue145;\red92\green38\blue153;
+\red0\green116\blue0;\red38\green71\blue75;\red46\green13\blue110;\red196\green26\blue22;\red28\green0\blue207;
+}
+\margl1440\margr1440\vieww9000\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\qc
+
+\f0\fs24 \cf0 DAO Guide\
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 1. The design of DAO layer.\
+The design of DAO layer includes three parts: database manager, model and DAO objects. Database manager manages the database connection and includes database related manipulations such as open database, create database, change database password and so on. Models are value objects, which define all the data items that corresponding to the database tables. DAO objects includes all the create, update, delete and select functions. This section describes the design of these three parts.\
+\
+a) The design of database manager.\
+Database manager includes several methods as follows:
+\f1\fs22 \CocoaLigature0 \
+\pard\tx560\pardeftab560\pardirnatural
+\cf0 + (\cf2 DatabaseManager\cf0  *)newInstance;\
+- (\cf3 void\cf0 )openDatabase:(\cf4 NSString\cf0  *) dbName withPassword:(\cf4 NSString\cf0  *) password;\
+- (\cf3 void\cf0 )closeDatabase;\
++ (\cf3 BOOL\cf0 )createDatabase;\
++ (\cf3 BOOL\cf0 )createDatabase:(\cf3 BOOL\cf0 ) forceCreate withName:(\cf4 NSString\cf0  *) databaseName;\
+- (\cf4 sqlite3\cf0  *) getDatabase; \
+- (\cf3 BOOL\cf0 )resetOldPassword:(\cf4 NSString\cf0  *) oldPwd withNewPassword:(\cf4 NSString\cf0  *) newPwd;\
++ (\cf3 BOOL\cf0 )databaseExists:(\cf4 NSString\cf0  *) dbName;\
+
+\f0\fs24 \CocoaLigature1 Also, we defined three private methods:\
+
+\f1\fs22 \CocoaLigature0 + (\cf3 BOOL\cf0 ) initTables:(\cf4 sqlite3\cf0  *) db;\
++ (\cf3 BOOL\cf0 ) initData:(\cf4 sqlite3\cf0  *) db;\
+- (\cf4 NSString\cf0  *) passwordWithPrefix:(\cf4 NSString\cf0  *) newPwd;
+\f0\fs24 \CocoaLigature1 \
+\
+The createDatabase:withName method will first delete the old database and create a new one based on the database name specified if forceCreate is true. If there is no databaseName been specified, it will use a default name that we predefined. After the database file is created, we will set a default password for the database.  After that, it will invoke initTables and initData method to initialize the database. Usually, we create a clean database in the unit tests.  The real application do not use this method to create database, but a default database will be supplied with the application package. In the default createDatabase method, forceCreate is false and databaseName is the default name.\
+\
+The openDatabase:withPassword method opens the database with the specified name and password. If either one of them are nil, the default value is used. Usually, we do not need to use a different database name except the unit tests. Because we use sqlcipher to encrypt the database, we will execute a sql command to check whether the pragma method, which is used to decrypt the database, is execute successfully. This step is required since pragma command does not have any return value. If we cannot execute the select sql command, this means the password is wrong and  we will close the database. If we failed to open the database, the getDatabase method will always return a nil value.\
+\
+The resetOldPassword:withNewPassword methods reset a new password for the database. It fulfill this task by execute the pragma rekey command. Usually, the user will input a new password when they first opened the application. The real password is the user input plus a default string. This process is done in passwordWithPrefix  method. \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 b) The design of model.\
+The design of model is very simple. We only defined an interface called GeneralEntity, in which only a getDbId method is defined. The method returns the database id, which is an integer value.\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0 - (\cf4 NSInteger\cf0 ) getDbId;\
+
+\f0\fs24 \CocoaLigature1 All the model objects must implement this interface and return the dbId in the getDbId method. We will talk about composite key in the following section.\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 c) The design of DAO object.\
+To implement the DAO objects, we first defined an interfaces: BaseDAO, which defines the lower layer methods of data accessing. GeneralDAO and CompositeDAO (not implemented in the current version) objects implemented this interface. GeneralDAO implemented a default version of all the methods defined in BaseDAO. Also, it defines several methods that assume the primary key of the table is integer type. In this section, we describe the design of DAO objects. The following are the methods we defined in BaseDAO:\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf3 \CocoaLigature0 @required\cf0 \
+- (\cf3 BOOL\cf0 ) insert:(\cf4 NSObject\cf0  *)obj;\
+- (\cf3 BOOL\cf0 ) update:(\cf4 NSObject\cf0  *)obj;\
+- (\cf3 BOOL\cf0 ) remove:(\cf4 NSObject\cf0  *) obj;\
+\
+\cf3 @optional\cf0 \
+- (\cf4 NSMutableArray\cf0  *) selectWhere:(\cf4 NSString\cf0  *) clause OrderBy:(\cf4 NSString\cf0  *) order;\
+- (\cf4 NSMutableArray\cf0  *) search:(\cf4 NSMutableDictionary\cf0  *) conditions orderBy:(\cf4 NSString\cf0  *) order;\
+- (\cf3 BOOL\cf0 ) removeAllObject;\
+- (\cf4 NSInteger\cf0 ) totalCount;\
+- (\cf4 NSMutableArray\cf0  *) getAllObject;
+\f0\fs24 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 In this interface, the first three methods is required and the others are optional to implement. The insert, update and remove method is very simple. All of them take an NSObject object parameter and return a boolean value. The input parameter must be a model object, which means this object must implement GeneralEntity interface. There are two optional select methods: selectWhere:OrderBy method and search:orderBy method. The parameters of the first method are the where clause and order clause of a normal select sql command. In these two parameter you do not need to specify the "where" and "order by" key words.\
+\
+GeneralDAO is the base DAO object for tables that use an integer type primary key. ContactDAO, NoteDAO and RoleDAO extended this class. In GeneralDAO, we not only give a default implement of the methods that defined in BaseDAO interface but also define and implement several template methods:\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf5 \CocoaLigature0 //these methods MUST be overrided in the subclasses\cf0 \
+- (\cf4 NSObject\cf0  *) readObject:(\cf4 sqlite3_stmt\cf0  *) statement;\
+- (\cf4 NSString\cf0  *) getTableName;\
+- (\cf4 NSString\cf0  *) getSelectSql;\
+\cf5 //these methods can be overrided\cf0 \
+- (\cf4 NSObject\cf0  *) findById:(\cf4 NSInteger\cf0 ) objid;\
+- (\cf3 BOOL\cf0 ) executeSQL:(\cf4 NSString\cf0  *)sql;\
+- (\cf4 NSMutableArray\cf0  *) executeSearchSQL:(\cf4 NSString\cf0  *)sql;\
+- (\cf3 BOOL\cf0 ) startTransaction;\
+- (\cf3 BOOL\cf0 ) commitTransation;\
+- (\cf3 BOOL\cf0 ) rollback;\
+- (\cf3 BOOL\cf0 ) emptyString:(\cf4 NSString\cf0  *)str;\
+- (\cf4 NSString\cf0  *) convertNilString:(\cf4 NSString\cf0  *)str;
+\f0\fs24 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+Among those methods readObject, getTableName, and getSelectSql must be overridden by a subclass. The getTableName method simply returns the name of the table. The getSelectSql method return the select clause of the sql command. Also, we can join with other tables in this method. The  readObject method read a row of data from database result set and return an object value. The sequence of columns is the same with what we wrote in the getSelectSql method.\
+\
+The executeSQL and executeSearchSQL methods are two template methods. The first one execute a sql command that has no return value, and the second method execute a select sql command and return all the result as a NSMutableArray. The commitTransaction, rollback, and startTransaction methods encapsulate the transaction sql commands. In this version, we do not use these methods.\
+\
+Finally, we also defined a private method called getLastInsertRowID, which should be used accompany with insert method to get the the id of the last inserted record.\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0 - (\cf4 NSInteger\cf0 ) getLastInsertRowID;\
+
+\f0\fs24 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 2. DAO layer user guide.\
+a) open a database connection.\
+When the application started we need to create the database connection. This is done with the openDatabase:withPassword method. Here is an example:\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0     \cf2 DatabaseManager\cf0  * dbManager = [\cf2 DatabaseManager\cf0  \cf6 newInstance\cf0 ];\
+    [dbManager \cf6 openDatabase\cf0 :\cf3 nil\cf0  \cf6 withPassword\cf0 :\cf2 password\cf0 .\cf4 text\cf0 ];\
+    \cf3 if\cf0  ([dbManager \cf6 getDatabase\cf0 ] != \cf3 NULL\cf0 ) \{\
+        [\cf3 self\cf0  \cf7 dismissModalViewControllerAnimated\cf0 :\cf3 YES\cf0 ];\
+    \} \cf3 else\cf0  \{\
+        \cf2 error\cf0 .\cf4 text\cf0  = \cf8 @"Wrong password."\cf0 ;\
+    \}\
+\
+In this code, we first acquire the instance of the DatabaseManager object (a singleton object). Then we open the database with openDatabase:withPassword method. Here the name of the database is nil, which means the default database name will be used. We can check whether the database is successfully opened by compare the return value of getDatabase method with NULL. If the value is NULL, then the database was failed to be opened.\
+\
+When we write a unit test, we usually create a new database first. Here is an example:\
+    [\cf2 DatabaseManager\cf0  \cf6 createDatabase\cf0 :\cf3 TRUE\cf0  \cf6 withName\cf0 :\cf8 @"user/db/test.db"\cf0 ];\
+    \cf2 DatabaseManager\cf0  * dm = [\cf2 DatabaseManager\cf0  \cf6 newInstance\cf0 ];\
+    [dm \cf6 openDatabase\cf0 :\cf8 @"user/db/test.db"\cf0  \cf6 withPassword\cf0 :\cf3 nil\cf0 ];\
+In this code, we first create a new database (the old database will be deleted) by set the forceCreate parameter as true. Then we open the database in the same way as the last example.\
+
+\f0\fs24 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 b) use DAO objects.\
+The usage of DAO objects is very simple. After you create an instance of a DAO object then you can execute any methods of this method.  The database connection and statement are managed in GeneralDAO. Usually, these manipulations are transparent to the users. \
+\
+When you use selectWhere:orderBy method you must know whether this table is joined with other tables. In this case, you need to use the alias name with the column name. Here is an example:\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0 - (\cf4 NSMutableArray\cf0  *)loadAllContacts \{\
+    \cf3 if\cf0  (\cf2 contactArray\cf0  == \cf3 nil\cf0 ) \{\
+        \cf2 contactArray\cf0  = [\cf2 contactDao\cf0  \cf6 selectWhere\cf0 :\cf3 nil\cf0  \cf6 OrderBy\cf0 :\cf8 @" c.roleid asc"\cf0 ];\
+    \}\
+\
+    \cf3 return\cf0  \cf2 contactArray\cf0 ;\
+\}\
+In this example, the contact table is inner join with role table.
+\f0\fs24 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+c) use transaction.\
+\
+3. Extend DAO layer.\
+a) add a new table.\
+When we want to add a new table to our project, we need do several steps:\
+  (1) Define the Model object by implement the GeneralEntity interface.\
+  (2) Define the DAO object by extend the GeneralDAO object.\
+Usually, we only need to write the correct sql command when we implement the DAO object and call executeSql or executeSelectSql command to execute the command. Here is an example:\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0 - (\cf3 BOOL\cf0 ) insert:(\cf4 NSObject\cf0  *)obj\
+\{\
+    \cf2 Contact\cf0  * contact = (\cf2 Contact\cf0  *)obj;\
+    \cf3 if\cf0  (obj == \cf3 nil\cf0 || contact.\cf2 role\cf0  == \cf3 nil\cf0  || contact.\cf2 role\cf0 .\cf2 dbId\cf0  <= \cf9 0\cf0 ) \{\
+        \cf3 return\cf0  \cf3 FALSE\cf0 ;\
+    \}\
+    \
+    \cf4 NSString\cf0  *sql = [\cf4 NSString\cf0  \cf7 stringWithFormat\cf0 : \cf8 @"INSERT INTO CONTACT (FIRSTNAME, LASTNAME, PHONEAPPOINTMENT, PHONEREFILL, PHONEAFTERHOUR, PHONEDIRECT, ABRECORDID, ROLEID) VALUES ('%@', '%@','%@','%@','%@','%@', %d, %d)"\cf0 , [\cf3 self\cf0  \cf6 convertNilString\cf0 : contact.\cf2 firstName\cf0  ], [\cf3 self\cf0  \cf6 convertNilString\cf0 : contact.\cf2 lastName\cf0 ], [\cf3 self\cf0  \cf6 convertNilString\cf0 : contact.\cf4 getAppointmentPhone\cf0 ], [\cf3 self\cf0  \cf6 convertNilString\cf0 : contact.\cf4 getRefillPhone\cf0 ], [\cf3 self\cf0  \cf6 convertNilString\cf0 : contact.\cf4 getAfterhourPhone\cf0 ], [\cf3 self\cf0  \cf6 convertNilString\cf0 : contact.\cf4 getDirectPhone\cf0 ], contact.\cf4 getABRecordID\cf0 , contact.\cf2 role\cf0 .\cf2 dbId\cf0 ];\
+    \cf3 BOOL\cf0  result = [\cf3 self\cf0  \cf6 executeSQL\cf0 :sql];\
+    \cf3 if\cf0  (result)\
+        contact.\cf2 dbId\cf0  = [\cf3 self\cf0  \cf6 getLastInsertRowID\cf0 ];\
+\pard\tx560\pardeftab560\pardirnatural
+\cf5 //    NSLog(@"%@",sql);\cf0 \
+    \cf3 return\cf0  result;\
+\}\
+\
+You can find more examples in ContactDAO, NoteDAO and RoleDAO.\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f0\fs24 \cf0 \CocoaLigature1  \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 b) add a new table with composite key.}

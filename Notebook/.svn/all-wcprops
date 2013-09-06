@@ -1,0 +1,137 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook
+END
+ConfigDAO.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/ConfigDAO.h
+END
+main.m
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/main.m
+END
+Default@2x.png
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/Default@2x.png
+END
+ConfigDAO.m
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/ConfigDAO.m
+END
+BaseDAO.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/BaseDAO.h
+END
+Notebook-Prefix.pch
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/Notebook-Prefix.pch
+END
+DatabaseManager.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/DatabaseManager.h
+END
+GeneralDAO.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/GeneralDAO.h
+END
+guide.rtf
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/guide.rtf
+END
+DatabaseManager.m
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/DatabaseManager.m
+END
+Config.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/Config.h
+END
+GeneralDAO.m
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/GeneralDAO.m
+END
+Config.m
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/Config.m
+END
+.DS_Store
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/.DS_Store
+END
+GeneralEntity.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/GeneralEntity.h
+END
+AppDelegate.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/AppDelegate.h
+END
+Notebook-Info.plist
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/Notebook-Info.plist
+END
+ViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/ViewController.h
+END
+AppDelegate.m
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/AppDelegate.m
+END
+Default.png
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/Default.png
+END
+Default-568h@2x.png
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/Default-568h@2x.png
+END
+ViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/mobileApp/!svn/ver/15/trunk/IPhone/Notebook/ViewController.m
+END
